@@ -1,7 +1,7 @@
-const site = "http://localhost/Chitra-Gagan/";
-const profile = "../../profile/";
+// const site = "http://localhost/Chitra-Gagan/";
 var currentalt;
 var currentlikes;
+var currentUploaderId;
 // Get the modal
 var modal = document.getElementById("myModal");
 
@@ -9,19 +9,28 @@ var modal = document.getElementById("myModal");
 var images = document.getElementsByClassName("display-image");
 var modalImg = document.getElementById("img01");
 var captionText = document.getElementById("caption");
+var downloadLink = document.getElementById("downloadLink");
+var currentImageFile;
+var noice = "haha";
+console.log(downloadLink);
 
 for (i = 0; i < images.length; i++) {
   images[i].onclick = function () {
     let no = i;
     this.info = this;
-    modal.style.display = "block";
+    modal.style.display = "flex";
     modalImg.src = this.src;
-    captionText.innerHTML = this.alt;
+    console.log(this.src);
+    // captionText.innerHTML = this.alt;
     let requestFor = extract_info(this.alt);
+    console.log(extract_info);
     currentalt = this.alt;
     fetchImageData(requestFor.image_id);
     fetchCreatorData(requestFor.id);
+    visitProfile(requestFor.id);
+    let source = this.src;
     checkIfLiked(this.alt);
+    // visitProfile();
     // console.log(mesg);
     // console.log("haha");
   };
@@ -47,9 +56,14 @@ function fetchImageData(imageId) {
       let response = JSON.parse(this.responseText);
       console.log(response);
       setImageInfo(response);
+      setDownloadLink(response);
     }
   };
-  xhttp.open("POST", site + "images/get_image_info/"+extract_info(currentalt).image_id, true);
+  xhttp.open(
+    "POST",
+    site + "images/get_image_info/" + extract_info(currentalt).image_id,
+    true
+  );
   xhttp.send();
 }
 
@@ -62,20 +76,37 @@ function fetchCreatorData(userId) {
       setUserInfo(response);
     }
   };
-  xhttp.open("POST", site + "images/get_creator_info/"+extract_info(currentalt).id, false);
+  xhttp.open(
+    "POST",
+    site + "images/get_creator_info/" + extract_info(currentalt).id,
+    false
+  );
+  xhttp.send();
+}
+function getImageProperty(file) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      let response = JSON.parse(this.responseText);
+      console.log(response);
+      setImageProperty(response);
+    }
+  };
+  xhttp.open("POST", site + "images/get_image_property/" + file, false);
   xhttp.send();
 }
 function setUserInfo(userInfo) {
   document.getElementById("modalUsername").innerHTML = userInfo.username;
   // let profileSource = document.getElementById('modalProfile').src.split('X:');
-
   document.getElementById("modalProfile").src = profile + userInfo.profile;
 }
 
 function setImageInfo(imageInfo) {
-  // console.log(imageInfo.like=";like");
+  console.log(imageInfo);
   currentlikes = imageInfo.likes;
   document.getElementById("likeCount").innerHTML = imageInfo.likes;
+  document.getElementById("imageTitle").innerHTML = imageInfo.title;
+  getImageProperty(imageInfo.location);
 }
 
 //for like
@@ -90,20 +121,20 @@ likeButton.addEventListener("click", () => {
     setLiked();
     likePlus(currentalt);
   } else {
-    unsetLiked()
+    unsetLiked();
     likeSub(currentalt);
   }
   // console.log(likeButtonStatus);
 });
- 
-function setLiked(){
+
+function setLiked() {
   likeButtonStatus = 1;
-  likeButton.innerHTML = "liked";
+  likeButton.innerHTML = '<i class="uil uil-thumbs-up"></i>';
   likeButton.style.color = "red";
 }
-function unsetLiked(){
+function unsetLiked() {
   likeButtonStatus = 0;
-  likeButton.innerHTML = "like";
+  likeButton.innerHTML = '<i class="uil uil-thumbs-up"></i>';
   likeButton.style.color = "white";
 }
 function likePlus(alt) {
@@ -113,7 +144,6 @@ function likePlus(alt) {
       if (this.responseText == "1") {
         currentlikes++;
         document.getElementById("likeCount").innerHTML = currentlikes;
-
       }
     }
   };
@@ -126,8 +156,8 @@ function likeSub(alt) {
   request.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       if (this.responseText == "1") {
-         document.getElementById("likeCount").innerHTML = currentlikes -1;
-         currentlikes--;
+        document.getElementById("likeCount").innerHTML = currentlikes - 1;
+        currentlikes--;
       }
     }
   };
@@ -141,12 +171,51 @@ function checkIfLiked(alt) {
     if (this.readyState == 4 && this.status == 200) {
       if (this.responseText == "1") {
         setLiked();
-      }
-      else{
+      } else {
         unsetLiked();
       }
     }
   };
   xhttp.open("POST", site + "images/check_like/" + alt, true);
   xhttp.send();
+}
+function setDownloadLink(imageInfo) {
+  // console.log(imageInfo.location);
+  downloadLink.addEventListener("click", function () {
+    downloadFile(imageInfo.location);
+    // console.log(imageInfo.location);
+    // console.log("here01  ".imageInfo.location);
+  });
+}
+function downloadFile(file) {
+  window.location = site + "images/downloads_file/" + file;
+}
+
+function visitProfile(currentUploaderId) {
+  var triggerClass = "uploader";
+  if (currentUploaderId != undefined) {
+    let profile_trigger = document.getElementsByClassName(triggerClass);
+    for (i = 0; i < profile_trigger.length; i++) {
+      profile_trigger[i].onclick = function () {
+        window.location = site + "users/visit_profile/" + currentUploaderId;
+        console.log(currentUploaderId);
+      };
+    }
+  }
+}
+function setImageProperty(properties) {
+  let height = document.getElementById("imageHeight");
+  let width = document.getElementById("imageWidth");
+  let type = document.getElementById("imageType");
+  let bits = document.getElementById("imageBits");
+  let dimension = extractHeightWidth(properties["3"])
+  width.innerHTML ="width:" + dimension.width;
+  height.innerHTML ="height:" + dimension.height;
+  type.innerHTML ="type:"+ properties.mime;
+  bits.innerHTML = "bits:"+properties.bits;
+}
+//exploding dimension string
+function extractHeightWidth(dimension){
+ let data=dimension.split('"');
+ return {width:data[1],height:data[3]}
 }

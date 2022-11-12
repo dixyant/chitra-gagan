@@ -4,10 +4,28 @@ class Users extends Controller
     public function __construct()
     {
         $this->user_model = $this->model('User');
+        $this->image_model = $this->model('Image');
     }
-    public function index(){
-        $this->view('pages/index');
+    public function index()
+    {
+        $data = $this->image_model->image_sugesstion();
+        $row1 = array();
+        $row2 = array();
+        $row3 = array();
 
+        array_push($row1, $data[0]);
+        for ($i = 0; $i < count($data); $i++) {
+            if (($i + 3) % 3 == 0) {
+                array_push($row1, $data[$i]);
+            } elseif (($i + 2) % 3 == 0) {
+                array_push($row2, $data[$i]);
+            } elseif (($i + 1) % 3 == 0) {
+                array_push($row3, $data[$i]);
+            }
+        }
+
+        $newData = array($row1, $row2, $row3);
+        $this->view('pages/index', $newData);
     }
     public function register()
     {
@@ -58,6 +76,8 @@ class Users extends Controller
             //validate username
             if (empty($data['username'])) {
                 $data['username_err'] = 'Please enter username';
+            } elseif (strlen($data['username']) < 6) {
+                $data['username_err'] = 'username must be at least 6 character';
             } else {
                 //check email
                 if ($this->user_model->find_user_by_username($data['username'])) {
@@ -97,9 +117,9 @@ class Users extends Controller
                 }
             } else {
                 echo 'not validated';
-                print_r($data);
+                // print_r($data);
                 //load view with errors
-                // $this->view('users/register', $data);
+                $this->view('users/register', $data);
             }
         } else {
             //Init data
@@ -157,7 +177,6 @@ class Users extends Controller
                 if ($logged_in_user) {
                     //create session
                     $this->create_user_session($logged_in_user);
-
                 } else {
                     $data['password_err'] = 'Password Incorrect';
                     $this->view('users/login', $data);
@@ -166,7 +185,7 @@ class Users extends Controller
                 echo 'not validated';
                 print_r($data);
                 //load view with errors
-                // $this->view('users/register', $data);
+                $this->view('users/login', $data);
             }
         } else {
             //Init data
@@ -193,11 +212,93 @@ class Users extends Controller
     public function logout()
     {
         unset($_SESSION['user_id']);
-        unset($_SESSION['user_fname'] );
+        unset($_SESSION['user_fname']);
         unset($_SESSION['user_lname']);
         unset($_SESSION['user_username']);
         unset($_SESSION['user_email']);
         session_destroy();
         redirect('users/login');
+    }
+    public function profile_search()
+    {
+        if (isset($_SESSION['user_id'])) {
+            if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+
+                // $_GET = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+                $search_value = trim($_GET['search']);
+                $filtered_search = htmlspecialchars($search_value);
+                $data = array();
+                $data1 = $this->user_model->search_profile($filtered_search);
+                if (!empty($data1)) {
+                    $data["exact_user"] = $data1;
+                }
+                if (strlen($filtered_search) >= 0) {
+                    $data2 = $this->user_model->search_beginlike_profile($filtered_search);
+                    // $data3 = $this->user_model->search_like_profile($filtered_search);
+
+                    if (!empty($data2)) {
+                        $data["approx_user"] = $data2;
+                    }
+                    // if (!empty($data3)) {
+                    //     array_push($data, $data3);
+                    // }
+                }
+
+                $data4 =  $this->image_model->search_image($filtered_search);
+                $row1 = array();
+                $row2 = array();
+                $row3 = array();
+
+                array_push($row1, $data4[0]);
+                for ($i = 1; $i < count($data4); $i++) {
+                    if (($i + 3) % 3 == 0) {
+                        array_push($row1, $data4[$i]);
+                    } elseif (($i + 2) % 3 == 0) {
+                        array_push($row2, $data4[$i]);
+                    } elseif (($i + 1) % 3 == 0) {
+                        array_push($row3, $data4[$i]);
+                    }
+                }
+
+                $new_data4 = array($row1, $row2, $row3);
+                $data["images"] = $new_data4;
+                $this->view("pages/search_view", $data);
+                // return $data;
+            }
+        } else {
+            redirect('users/login');
+        }
+    }
+
+    public function visit_profile($uid)
+    {
+        if (isset($_SESSION['user_id'])) {
+            $data1 =  $this->image_model->get_creator_data($uid);
+            $data2 = $this->image_model->get_images($uid);
+
+            // $data = json_encode(json_decode(json_encode($data), true));
+            // $this->view("pages/userprofile", $data);
+            $row1 = array();
+            $row2 = array();
+            $row3 = array();
+            if (!empty($data2)) {
+                array_push($row1, $data2[0]);
+                for ($i = 0; $i < count($data2); $i++) {
+                    if (($i + 3) % 3 == 0) {
+                        array_push($row1, $data2[$i]);
+                    } elseif (($i + 2) % 3 == 0) {
+                        array_push($row2, $data2[$i]);
+                    } elseif (($i + 1) % 3 == 0) {
+                        array_push($row3, $data2[$i]);
+                    }
+                }
+            }
+            $new_data2 = array($row1, $row2, $row3);
+            $data = ['user' => $data1, 'images' => $new_data2];
+            // $data = json_encode(json_decode(json_encode($data), true));
+            $this->view("pages/userprofile", $data);
+        } else {
+            $this->view(SITE);
+        }
     }
 }
