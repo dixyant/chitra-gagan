@@ -69,7 +69,11 @@ class Pages extends Controller
       $data=[];
       $uid = $_SESSION['user_id'];
       $data['image'] = $this->image_model->fetch_profile($uid);
+      if($error == 'a'){
+        $data['upload_error'] = null;
+      }else{
       $data['upload_error'] = $error;
+      }
       // var_dump($data);
       $this->view('pages/profile_upload', $data);
     } else {
@@ -152,9 +156,14 @@ class Pages extends Controller
   //     }
   // }
 }
-function delete_users_image($image_id){
+function delete_users_image($image_id,$user_id){
+  if($_SESSION["user_id"] == $user_id){
   if($this->image_model->delete_image($image_id)){
     $this->mygallery();
+  }
+  else{
+    $this->mygallery();
+  }
   }
 }
 }

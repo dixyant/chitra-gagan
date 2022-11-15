@@ -53,16 +53,16 @@
 
                 <div class="collection">
                     <?php foreach ($data['images'][1] as $row2) : ?>
-                        <?php if (!empty($row1)) : ?>
-                            <img class="display-image" src=<?= RUPLD_FILE . $row1["location"] ?> alt=<?= $row1["uid"] . "X:" .  $row1["id"] ?>>
+                        <?php if (!empty($row2)) : ?>
+                            <img class="display-image" src=<?= RUPLD_FILE . $row2["location"] ?> alt=<?= $row2["uid"] . "X:" .  $row2["id"] ?>>
                         <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
 
                 <div class="collection">
                     <?php foreach ($data['images'][2] as $row3) : ?>
-                        <?php if (!empty($row1)) : ?>
-                            <img class="display-image" src=<?= RUPLD_FILE . $row1["location"] ?> alt=<?= $row1["uid"] . "X:" . $row3["id"] ?>>
+                        <?php if (!empty($row3)) : ?>
+                            <img class="display-image" src=<?= RUPLD_FILE . $row3["location"] ?> alt=<?= $row3["uid"] . "X:" . $row3["id"] ?>>
                         <?php endif; ?>
                     <?php endforeach; ?>
                 </div>

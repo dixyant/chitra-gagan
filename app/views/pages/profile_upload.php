@@ -14,6 +14,16 @@
 						<span class="form-span"> <?php echo (!empty($data['upload_error'])) ? $data['upload_error'] : ''; ?> </span>
 					</div>
 				<?php endif; ?>
+
+
+				<div class="form-options">
+					<input type="email" name="email" id="email" value="<?php echo $data['email']; ?>" placeholder="Your Email" required />
+				</div>
+				<?php if (!empty($data['email_err'])) : ?>
+					<div class="form-options">
+					  <span class="form-span"> <?php echo (!empty($data['email_err'])) ?  $data['email_err'] : '';  ?> </span>
+					</div>
+    			<?php endif; ?>
 				<div class="form-options uploadbtn">
 					<!-- <input class="uploadbtn" type="submit" name="submit" value= 'UPLOAD'>
 				 -->
@@ -28,7 +38,6 @@
 			</div>
 		</div>
 	</div>
-<h1><?php var_dump($data)?></h1>
 </div>
 
 <?php require APPROOT . '/views/includes/footer.php'; ?>

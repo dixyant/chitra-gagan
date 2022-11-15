@@ -13,9 +13,9 @@ define('URLROOT','http://localhost/chitra-gagan');
 //define SITENAME
 define('SITENAME','chitra-gagan');
 //defining the upload folder
-define('UPLD_FILE','D:\XAMPP\htdocs\uploads');
+define('UPLD_FILE','D:\XAMPP\htdocs\uploads\\');
 //defining the profile upload
-define('PROF_FOLD','D:\XAMPP\htdocs\profile');
+define('PROF_FOLD','D:\XAMPP\htdocs\profile\\');
 //defining the host
 define('SITE','http://localhost/');
 //relative upload folder

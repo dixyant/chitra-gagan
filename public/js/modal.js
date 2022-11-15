@@ -28,6 +28,7 @@ for (i = 0; i < images.length; i++) {
     fetchImageData(requestFor.image_id);
     fetchCreatorData(requestFor.id);
     currentImageId = requestFor.image_id;
+    currentUploaderId =requestFor.id;
     visitProfile(requestFor.id);
     let source = this.src;
     checkIfLiked(this.alt);
@@ -88,11 +89,13 @@ function getImageProperty(file) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
+      console.log(this.responseText)
       let response = JSON.parse(this.responseText);
       console.log(response);
       setImageProperty(response);
     }
   };
+  console.log(file)
   xhttp.open("POST", site + "images/get_image_property/" + file, false);
   xhttp.send();
 }
@@ -230,7 +233,7 @@ function deleteImage($imageid) {
   //   if (this.readyState == 4 && this.status == 200) {
   //     // let response = JSON.parse(this.responseText);
   //     console.log(this.responseText);
-  window.location = site + "pages/delete_users_image/" + currentImageId;
+  window.location = site + "pages/delete_users_image/" + currentImageId+"/"+currentUploaderId;
   //    }
   // };
   // xhttp.open("POST", site + "images/delete_users_image/" + $imageid, true);
